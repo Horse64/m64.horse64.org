@@ -1,0 +1,7 @@
+*~
+*.o
+/*.bin
+/*.exe
+__pycache__/
+/horse_modules/
+**/horse_modules/*
