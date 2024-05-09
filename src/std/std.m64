@@ -1,0 +1,103 @@
+## @module std
+# Copyright (c) 2024, ellie/@ell1e & m64 stdlib authors (see AUTHORS.md).
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+# 1. Redistributions of source code must retain the above copyright notice,
+#    this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright notice,
+#    this list of conditions and the following disclaimer in the documentation
+#    and/or other materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+#
+# Alternatively, at your option, this file is offered under the Apache 2
+# license, see accompanied LICENSE.md.
+
+c_import "stdlib.h" as c_stdlib
+c_import "stdio.h" as c_stdio
+
+const str_stack_bytes <- size = 8
+
+struct str {
+    union {
+        struct {
+            var _stack_buf <- byte array[str_stack_bytes]
+            var _stack_buf_len <- u16
+        }
+        struct {
+            var _heap_buf <- byte array
+            var _heap_buf_len <- u16
+        }
+    }
+    var _on_heap <- bool
+}
+
+func str.init(other_str <- str) -> str ref {
+    if not other_str._on_heap {
+        std.memcpy(
+            std.addr(other_str), std.addr(self), std.sizeof(self)
+        )
+    } else {
+        self._on_heap = 1
+        self._heap_buf = std.alloc(
+            other_str._heap_buf_len
+        )
+        if self._heap_buf == none {
+            return none
+        }
+        self._heap_buf_len = other_str._heap_buf_len
+    }
+    return self
+}
+
+func str.init(other_str <- byte array) -> str ref {
+    var c_str_len <- size = std.c_strlen(other_str)
+    if c_str_len < str_stack_bytes {
+        std.memcpy(
+            other_str, self._stack_buf, c_str_len + 1
+        )
+        self._stack_buf_len = c_str_len
+        return self
+    }
+    self._on_heap = 1
+    self._heap_buf = std.alloc(c_str_len + 1)
+    if self._heap_buf == none {
+        return none
+    }
+    std.memcpy(
+        other_str, self._heap_buf, c_str_len + 1
+    )
+    self._heap_buf_len = c_str_len
+    return self
+}
+
+func str.init -> str ref {
+    return self
+}
+
+func str.destroy {
+    if self._on_heap {
+        std.unalloc(self._heap_buf)
+    }
+}
+
+func alloc(size <- u64) -> any ref {
+    return c_func(malloc)(size)
+}
+
+func unalloc(size <- u64) -> any ref {
+    return c_func(free)(size)
+}
+
