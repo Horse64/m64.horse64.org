@@ -1,5 +1,5 @@
 
-m64 stdlib Licensing (m64 stdlib is the morse64 standard library)
+m64 stdlib Licensing (m64 stdlib is the moose64 standard library)
 =================================================================
 
 *(Note: this document omits compiled-in 3rd party dependencies. Without
@@ -253,6 +253,6 @@ Contributions, Binaries
 
 Same rules apply as for [main repo contributions, including the DCO](
     https://codeberg.org/Horse64/core.horse64.org/src/branch/main/LICENSE.md#contributions).
-Also, official morsec binaries may include [the official logo](
+Also, official moosec binaries may include [the official logo](
     https://codeberg.org/Horse64/core.horse64.org/src/branch/main/LICENSE.md#logo-license).
 
