@@ -28,7 +28,7 @@
 c_import "stdlib.h" as c_stdlib
 c_import "stdio.h" as c_stdio
 
-const str_stack_bytes <- size = 8
+const str_stack_bytes <- size = 32
 
 struct str {
     union {
@@ -62,7 +62,7 @@ func str.init(other_str <- byte array) -> str ref {
         self._stack_buf_len = c_str_len
         return self
     }
-    self._on_heap = 1
+    self._on_heap = yes
     self._heap_buf = std.alloc(c_str_len + 1)
     if self._heap_buf == none {
         return none
@@ -75,7 +75,62 @@ func str.init(other_str <- byte array) -> str ref {
 }
 
 func str.init -> str ref {
+    self._on_heap = no
+    self._stack_buf[1] = '\0'
+    self._stack_buf_len = 1
     return self
+}
+
+func str.add(other_str <- str) -> str ref {
+    var other_len = other_str.len
+    var other_data <- byte array = other._stack_buf
+    if other._on_heap {
+        other_data = other._heap_buf
+    }
+    return self.add(other_data, other_len - 1)
+}
+
+func str.add(c_str <- byte array) -> str ref {
+    return self.add(c_str, std.c_strlen(c_str))
+}
+
+func str.add(other_data <- byte array,
+             other_data_len <- size) -> str ref {
+    var own_len = self.len
+    var needed_len = other_data_len + own_len + 1
+    if self._on_heap or needed_len > str_stack_bytes {
+        var self_data <- byte array = self._stack_buf
+        var clear_ptr <- byte array = none
+        if self._on_heap {
+            self_data = self._heap_buf
+            clear_ptr = self._heap_buf
+            copy_own = yes
+        }
+        self._heap_buf = std.alloc(needed_len)
+        if self._heap_buf == none {
+            return none
+        }
+        std.memcpy(self._heap_buf, self_data, own_len)
+        std.memcpy(
+            self._heap_buf + own_len, other_data, other_data_len
+        )
+        self._heap_buf[own_len + other_data_len + 1] = '\0'
+        std.unalloc(clear_ptr)
+        self._heap_buf_len = needed_len
+        return self
+    }
+    std.memcpy(
+        self._stack_buf + own_len, other_data, other_data_len
+    )
+    self._stack_buf[own_len + other_data_len + 1] = '\0'
+    return self
+}
+
+func str.len {
+    if self._on_heap {
+        return self._heap_buf_len - 1
+    }
+    return self._stack_buf_len - 1
 }
 
 func str.destroy {
@@ -90,13 +145,17 @@ func str.copy_from(other_str <- str) -> str ref {
             std.addr(other_str), std.addr(self), std.sizeof(self)
         )
     } else {
-        self._on_heap = 1
+        self._on_heap = yes
         self._heap_buf = std.alloc(
             other_str._heap_buf_len
         )
         if self._heap_buf == none {
             return none
         }
+        std.memcpy(
+            self._heap_buf, other_str._heap_buf,
+            other_str.heap_buf_len
+        )
         self._heap_buf_len = other_str._heap_buf_len
     }
     return str
