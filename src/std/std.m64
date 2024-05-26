@@ -82,7 +82,7 @@ func str.init -> str ref {
 }
 
 func str.add(other_str <- str) -> str ref {
-    var other_len = other_str.len
+    var other_len <- size = other_str.len
     var other_data <- byte array = other._stack_buf
     if other._on_heap {
         other_data = other._heap_buf
@@ -96,8 +96,8 @@ func str.add(c_str <- byte array) -> str ref {
 
 func str.add(other_data <- byte array,
              other_data_len <- size) -> str ref {
-    var own_len = self.len
-    var needed_len = other_data_len + own_len + 1
+    var own_len <- size = self.len
+    var needed_len <- size = other_data_len + own_len + 1
     if self._on_heap or needed_len > str_stack_bytes {
         var self_data <- byte array = self._stack_buf
         var clear_ptr <- byte array = none
