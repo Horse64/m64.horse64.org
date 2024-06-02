@@ -49,11 +49,11 @@ func str.init -> str ref {
     return self
 }
 
-func str.init(other_str <- str) -> str ref {
+func str.init_as_copy(other_str <- str) -> str ref {
     return self.copy_from(other_str)
 }
 
-func str.init(other_str <- byte array) -> str ref {
+func str.init_from_c_str(other_str <- byte array) -> str ref {
     var c_str_len <- size = std.c_strlen(other_str)
     if c_str_len < str_stack_bytes {
         std.memcpy(
