@@ -2,12 +2,15 @@
 Moose64 Programming Language
 ============================
 
-This language is the evil sibling of [Horse64](https://horse64.org),
-designed for low-level use cases and deeply inspired by C.
-It is made to combine well with Horse64 where needed for
-performance reasons or for integrating pre-existing C libraries well.
-It has excellent C inter-operability and can be used mixed with regular
-C in bigger projects.
+[**Moose64**](https://m64.horse64.org) is like C but with pretty
+Horse64 syntax and basic plain OOP, for maintainable
+high-performance code. Uses:
+
+- Simpler than C++, but with usable OOP,
+
+- Approachable for Horse64 coders,
+
+- Great C inter-operability.
 
 **Currently unusable, stay tuned.**
 
