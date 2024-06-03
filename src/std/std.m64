@@ -26,7 +26,7 @@
 # license, see accompanied LICENSE.md.
 
 c_import "stdlib.h" as c_stdlib
-c_import "stdio.h" as c_stdio
+c_import "stdio.h" as c_stdlib
 
 const str_stack_bytes <- size = 32
 
@@ -162,10 +162,10 @@ func str.copy_from(other_str <- str) -> str ref {
 }
 
 func alloc(size <- u64) -> any ref {
-    return c_func(malloc)(size)
+    return c_stdlib.malloc(size)
 }
 
 func unalloc(size <- u64) -> any ref {
-    return c_func(free)(size)
+    return c_stdlib.free(size)
 }
 
