@@ -1,5 +1,5 @@
 
-![Moose64 Title Logo](/logo/logo.png)
+![Moose64 Title Logo](/logo/logo-readme.png)
 
 
 Moose64 Programming Language
