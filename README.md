@@ -1,4 +1,7 @@
 
+![Moose64 Title Logo](/logo/logo.png)
+
+
 Moose64 Programming Language
 ============================
 
