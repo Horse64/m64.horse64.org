@@ -27,9 +27,9 @@
      inkscape:pagecheckerboard="0"
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="mm"
-     inkscape:zoom="0.27349186"
-     inkscape:cx="670.95232"
-     inkscape:cy="850.1167"
+     inkscape:zoom="0.3867759"
+     inkscape:cx="533.90089"
+     inkscape:cy="880.35474"
      inkscape:window-width="1105"
      inkscape:window-height="647"
      inkscape:window-x="0"
@@ -38,6 +38,30 @@
      inkscape:current-layer="layer1" />
   <defs
      id="defs1">
+    <linearGradient
+       id="linearGradient35"
+       inkscape:collect="always">
+      <stop
+         style="stop-color:#fdfbe1;stop-opacity:1;"
+         offset="0"
+         id="stop36" />
+      <stop
+         style="stop-color:#fdfbe1;stop-opacity:0.40052551;"
+         offset="1"
+         id="stop37" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient34"
+       inkscape:collect="always">
+      <stop
+         style="stop-color:#fdfbe1;stop-opacity:1;"
+         offset="0"
+         id="stop34" />
+      <stop
+         style="stop-color:#fdfbe1;stop-opacity:0.53788364;"
+         offset="1"
+         id="stop35" />
+    </linearGradient>
     <linearGradient
        id="linearGradient28"
        inkscape:collect="always">
@@ -192,6 +216,28 @@
          result="blur"
          id="feGaussianBlur31" />
     </filter>
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient34"
+       id="radialGradient35"
+       cx="162.2188"
+       cy="215.6402"
+       fx="162.2188"
+       fy="215.6402"
+       r="13.519536"
+       gradientTransform="matrix(1,0,0,1.4400096,0,-94.379716)"
+       gradientUnits="userSpaceOnUse" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient35"
+       id="radialGradient37"
+       cx="200.27635"
+       cy="219.15816"
+       fx="200.27635"
+       fy="219.15816"
+       r="10.703947"
+       gradientTransform="matrix(5.0466401,-0.17422935,0.0564398,1.6348071,-822.81556,-101.65325)"
+       gradientUnits="userSpaceOnUse" />
   </defs>
   <g
      inkscape:label="Layer 1"
@@ -272,5 +318,14 @@
        id="text26"
        aria-label="64"
        sodipodi:nodetypes="cssscccccccsccscsccccscccccccccccccccccccc" />
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:url(#radialGradient35);stroke-width:1.86500001;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-dasharray:none"
+       d="m 183.96554,196.05412 c 0,0 -6.74559,-0.48467 -9.77913,0.73313 -3.15303,1.26577 -6.17195,3.53472 -7.86979,6.4777 -2.36664,4.10226 -2.32551,14.01635 -2.32551,14.01635 0,0 1.83869,9.26345 5.03411,12.35736 2.33947,2.26515 5.86216,3.38605 9.16145,3.39176 2.85956,0.005 5.87329,-0.59831 7.87394,-2.85166 2.46779,-2.77949 3.67751,-6.79383 2.83371,-10.41371 -0.72494,-3.10994 -2.93654,-6.22556 -5.81118,-7.61612 -2.88711,-1.39659 -6.55692,-0.77827 -9.61994,0.17242 -3.4416,1.06819 -9.01908,5.96044 -9.01908,5.96044"
+       id="path33"
+       sodipodi:nodetypes="csscssssssc" />
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:url(#radialGradient37);stroke-width:1.865;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-dasharray:none"
+       d="m 207.97406,203.18795 -7.75027,20.59135 18.62013,-0.14265 0.38451,-26.02558 0.11951,35.00167"
+       id="path34" />
   </g>
 </svg>
