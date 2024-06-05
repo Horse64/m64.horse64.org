@@ -11,8 +11,9 @@ too.)*
 License
 -------
 
-Files outside of the `vendor` directory are, unless indicated
-otherwise, licensed under the following **BSD-2-Clause license**:
+Files outside of the `logo` and `vendor` directory are, unless
+indicated otherwise, licensed under the following **BSD-2-Clause
+license**:
 
 ```
 Copyright (c) 2024, ellie/@ell1e & m64 stdlib authors (see AUTHORS.md).
@@ -246,6 +247,31 @@ following **Apache 2 License**:
    See the License for the specific language governing permissions and
    limitations under the License.
 ```
+
+
+Logo license
+------------
+
+This concerns the files inside `logo` directory:
+
+```
+Moose64 Logo is Copyright (C) 2024, ellie/@ell1e. All Rights Reserved.
+
+The "Moose64 Logo"'s files are located in `logo/` with the filenames
+starting with "logo".
+The Moose64 Logo and its files may only be used in the official
+unmodified "Moose64" distribution as maintained by ellie/@ell1e,
+currently found at codeberg.org/Horse64, github.com/Horse64, and
+https://horse64.org/.
+These official places may change in the future, watch out for that.
+DON'T DISTRIBUTE MODIFIED OR UNOFFICIAL MOOSE64 VERSIONS WITH THE LOGO,
+PLEASE DON'T USE THE OFFICIAL NAME "Moose64" FOR THEM EITHER.
+```
+
+*(Non-binding side notes: 1. Binaries you compile with `morsec` yourself
+of your own programs shouldn't by default include the logo, so these
+should be unaffected. 2. If you fork Moose64 just temporarily for
+preparing pull requests, that's fine of course.)*
 
 
 Contributions, Binaries
