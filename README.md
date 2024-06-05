@@ -7,7 +7,7 @@ Moose64 Programming Language
 
 [**Moose64**](https://m64.horse64.org) is like C but with pretty
 Horse64 syntax and basic plain OOP, for maintainable
-high-performance code. Uses:
+high-performance code. Its uses are:
 
 - Simpler than C++, but with usable OOP,
 
