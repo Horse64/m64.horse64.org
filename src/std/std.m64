@@ -54,6 +54,14 @@ func str.init_as_copy(other_str <- readonly str) -> str ref {
     return self.copy_from(other_str)
 }
 
+func str.init_from_inline_c_str(
+        c_str <- readonly byte array
+        ) -> str ref {
+    return self.init_from_bytebuf(
+        c_str, c_str_nulpos(c_str)
+    )
+}
+
 func str.init_from_bytebuf(
         c_str <- readonly byte array,
         c_str_len <- size

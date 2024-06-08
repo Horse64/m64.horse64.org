@@ -28,7 +28,7 @@
 import std from m64.horse64.org
 
 func main {
-    var s <- std.str = <("Hello World!")>
+    var s <- std.str("Hello World!")
     defer s.destroy()
     print(s)
 }
