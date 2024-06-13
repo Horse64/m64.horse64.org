@@ -45,11 +45,6 @@ struct str {
     var _on_heap <- bool
 }
 
-func str.init -> str ref {
-    self._on_heap = no
-    return self
-}
-
 func str.init_as_copy(other_str <- readonly str) -> str ref {
     return self.copy_from(other_str)
 }
@@ -168,6 +163,13 @@ func str.copy_from(other_str <- readonly str) -> str ref {
         self._heap_buf_len = other_str._heap_buf_len
     }
     return str
+}
+
+func str.get_c_str -> readonly byte array {
+    if self._on_heap {
+        return self._heap_buf
+    }
+    return self._stack_buf
 }
 
 func c_str_nulpos(str_ref <- readonly byte array) -> size {
