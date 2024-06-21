@@ -51,6 +51,8 @@ This is a syntax highlighting intended for kate and other KDE editors.
       <item>base</item>
       <item>extend</item>
       <item>with</item>
+      <item>failed</item>
+      <item>failable</item>
       <item>as</item>
       <item>func</item>
       <item>type</item>

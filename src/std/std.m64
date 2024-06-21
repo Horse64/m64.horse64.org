@@ -45,22 +45,25 @@ struct str {
     var _on_heap <- bool
 }
 
-func str.init_as_copy(other_str <- readonly str) -> str ref {
+func str.init_as_copy(other_str <- readonly str) failable {
     return self.copy_from(other_str)
 }
 
 func str.init_from_inline_c_str(
         c_str <- readonly byte array
-        ) -> str ref {
-    return self.init_from_bytebuf(
+        ) failable {
+    self.init_from_bytebuf(
         c_str, c_str_nulpos(c_str)
     )
+    if failed(self.init_from_bytebuf) {
+        return failed
+    }
 }
 
 func str.init_from_bytebuf(
         c_str <- readonly byte array,
         c_str_len <- size
-        ) -> str ref {
+        ) failable {
     if c_str_len < str_stack_bytes {
         c_stdlib.memcpy(
             c_str, self._stack_buf, c_str_len + 1
@@ -80,14 +83,14 @@ func str.init_from_bytebuf(
     return self
 }
 
-func str.init -> str ref {
+func str.init failable {
     self._on_heap = no
     self._stack_buf[1] = '\0'
     self._stack_buf_len = 1
     return self
 }
 
-func str.add(other_str <- readonly str) -> str ref {
+func str.add(other_str <- readonly str) failable {
     var other_len <- size = other_str.len
     var other_data <- byte array = other_str._stack_buf
     if other_str._on_heap {
@@ -99,7 +102,7 @@ func str.add(other_str <- readonly str) -> str ref {
 func str.add_bytebuf(
         c_str <- readonly byte array,
         c_str_len <- size
-        ) -> str ref {
+        ) failable {
     var own_len <- size = self.len
     var needed_len <- size = c_str_len + own_len + 1
     if self._on_heap or needed_len > str_stack_bytes {
