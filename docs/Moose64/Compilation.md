@@ -18,7 +18,7 @@ helps with project management.
 Stages
 ------
 
-These are the current compilation stages of horsec as of 2024-06-08:
+These are the current compilation stages of mooseec as of 2024-06-08:
 
 All stages from `--stage token` up to `--stage transformed-code` (or
 the equivalent `--stage transformed-ast`) are the same as found in
