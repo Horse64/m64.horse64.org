@@ -15,10 +15,14 @@ high-performance code. Its uses are:
 
 - Great C inter-operability.
 
+- [See more...](/docs/Features.md)
+
 **Currently unusable, stay tuned.**
 
 
 ### Useful starting points
+
+- [Read introduction](/docs/Introduction.md).
 
 - [Check project news](https://horse64.org/#news).
 
