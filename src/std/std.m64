@@ -148,7 +148,7 @@ func str.destroy {
 func str.copy_from(other_str <- readonly str) -> str ref {
     if not other_str._on_heap {
         memcpy(
-            addr(other_str), addr(self), sizeof(self)
+            as_ref(other_str), as_ref(self), sizeof(self)
         )
     } else {
         self._on_heap = yes
