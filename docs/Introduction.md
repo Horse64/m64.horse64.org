@@ -45,9 +45,9 @@ func main -> bool {
 }
 ```
 
-For variables and function parameters, a `<- ...type desc...` after
+For variables and function parameters, `<- ...type desc...` after
 the declaration will annotate the type. For function return values,
-a `-> ...type desc...` right before the code block will annotate
+`-> ...type desc...` right before the code block will annotate
 the type.
 
 Function pointers work by inlining the function header inside `(...)`
@@ -87,7 +87,7 @@ Also, structs don't allow any inheritance when using
 object-oriented functions.
 
 
-## Function calls and overrides
+### Function calls and overrides
 
 Unlike Horse64, Moose64 does **not allow so-called "keyword
 arguments with default values**. However, Moose64 **has
