@@ -5,15 +5,15 @@ Introduction to Moose64
 
 Moose64 is like C but with pretty Horse64 syntax and basic plain OOP,
 for maintainable high-performance code.
-It's part of the [Horse64](https://horse64.org) ecosystem.
+It's part of the [Horse64 ecosystem](https://horse64.org).
 
-[For a feature list, **go here**](/docs/Features.md).
+[For a 📋 features list, **go here**](/docs/Features.md).
 
 To build Moose64 programs and to manage dependencies, use [horp
 ](https://codeberg.org/Horse64/core.horse64.org/src/branch/main/docs/Resources.md#horp)
 like you would for Horse64 programs. The compiler for Moose64 is [moosec
 ](https://codeberg.org/Horse64/core.horse64.org/src/branch/main/docs/Resources.md#moosec)
-and part of the [SDK](
+and part of the [📥 SDK](
 https://codeberg.org/Horse64/core.horse64.org/src/branch/main/docs/Resources.md#sdk).
 
 
@@ -21,8 +21,8 @@ How to learn Moose64
 --------------------
 
 Since Moose64 is a side language to Horse64, this introduction
-expects you to know how Horse64 works. You then get Moose64
-with these following changes:
+expects you to know how Horse64 works. Based on its sibling,
+Moose64 was constructed with the following changes:
 
 
 ### Static types and type annotations
@@ -67,7 +67,9 @@ must be destroyed manually.
 
 Usually, this is achieved by using a `defer x.destroy()`
 right after some [struct instance](#oop-with-structs)
-`x` was successfully initialized.
+`x` was successfully initialized. The `defer` keyword
+runs a call delayed at the end of the current block,
+which can e.g. be used for safe resource cleanup.
 
 
 ### OOP with structs

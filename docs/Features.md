@@ -16,6 +16,9 @@ Moose64 has the following features:
 
 - Amazing integration with the Horse64 ecosystem.
 
-For how to use it, [check out the
+If you're a beginner, you may want to learn
+[Horse64](https://horse64.org) instead.
+
+For how to use Moose64, [check out the
 introduction](/docs/Introduction.md).
 
