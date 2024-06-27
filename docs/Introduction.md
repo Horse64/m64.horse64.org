@@ -65,9 +65,48 @@ func this_returns_a_func_ptr -> ((_<-i32) -> bool) {
 Moose64 has no garbage collection, instead all used data
 must be destroyed manually.
 
-Usually, this is achieved by using a `defer x.destroy()`
-right after some [struct instance](#oop-with-structs)
-`x` was successfully initialized. The `defer` keyword
+Usually, this is achieved by:
+
+- for structs, by using a `defer x.destroy()`
+  right after some [struct instance](#oop-with-structs)
+  `x` was successfully initialized via `.init` or an
+  init constructor short-hand:
+
+  ```Moose64
+  var s <- std.str("Hello World!")  # Short-hand for s.init("Hello World")
+  if failed(std.str) {
+      return -1
+  }
+  defer s.destroy()
+  # ...use `s` string here for whatever purpose...
+  ````
+
+- for allocated buffers or struct [`ref`s or `c_array`s](#ref-types),
+  by using a `defer std.unalloc(x)` right after some
+  `x = std.alloc(...)` to make sure the allocation is released
+  again later:
+
+  ```Moose64
+  var s <- byte c_array = std.alloc(256)
+  defer std.unalloc(s)
+  # ...use `s` array here for whatever purpose...
+  ```
+
+- for allocated arrays by using a `defer std.unalloc_array(x)`:
+
+  ```Moose64
+  
+  var s <- byte array = std.alloc_array(std.size_of_type(byte), 256)
+  defer std.unalloc_array(s)
+  # ...use `s` array here for whatever purpose...
+  ```
+
+Of course you're allowed to keep values around for longer
+as well rather than destroy them at the end of the block,
+but then you have to ensure they get destroyed or unalloc'ed
+somewhere later.
+
+The `defer` keyword
 runs a call delayed at the end of the current block,
 which can e.g. be used for safe resource cleanup.
 
@@ -79,7 +118,7 @@ which allows complex **object-oriented programming (OOP)**,
 Moose64's **default user type is the `struct`** statement.
 
 The biggest difference is that struct instances are **passed
-by value,** unless you use an explicit `ref` variable to
+by value,** unless you use an explicit [`ref` variable](#ref-types) to
 pass them around, unlike in Horse64 where user types
 are passed by reference.
 
@@ -91,6 +130,12 @@ via `func name_of_struct.func_attr_name ...` just like in
 Horse64, and extending structs via `extend struct` also
 works just like in Horse64. Therefore, other than type
 inheritance, all basic object-oriented pattern are available.
+
+
+### `ref` types
+
+Types marked with `ref` or with `c_array` are equivalent to
+C's pointers.
 
 
 ### Function calls and overrides
