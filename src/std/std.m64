@@ -83,7 +83,9 @@ func str.init_from_bytebuf(
         return
     }
     self._on_heap = yes
-    #self._heap_buf = alloc_array(self._heap_buf, str_len + 1)  # FIXME.
+    #self._heap_buf = alloc_array(size_of(deref(self._heap_buf)),
+    #    str_len + 1
+    #)  # FIXME.
     self._heap_buf.data = alloc(str_len + 1)
     if failed(alloc) {
         return failed
