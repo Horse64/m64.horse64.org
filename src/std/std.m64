@@ -29,7 +29,10 @@ c_import "stdlib.h" as c_stdlib
 c_import "stdio.h" as c_stdlib
 c_import "string.h" as c_stdlib
 
+import std.limit as limit
+
 const str_stack_bytes <- size = 32
+const array_size_unset <- size = limit.size_max
 
 struct str {
     union {
@@ -39,48 +42,57 @@ struct str {
         }
         struct {
             var _heap_buf <- byte array
-            var _heap_buf_len <- u16
         }
     }
     var _on_heap <- bool
 }
 
-func str.init_as_copy(other_str <- readonly str) failable {
+func str.init_as_copy(
+        other_str <- readonly str
+        ) failable override {
     return self.copy_from(other_str)
 }
 
 func str.init_from_inline_c_str(
-        c_str <- readonly byte array
-        ) failable {
-    self.init_from_bytebuf(
-        c_str, c_str_nulpos(c_str)
-    )
+        c_str <- readonly byte c_array
+        ) failable override {
+    var c_array <- readonly byte array =
+        as(readonly byte array, c_str)
+    c_array.len = c_str_nulpos(c_str)
+    self.init_from_bytebuf(c_array)
     if failed(self.init_from_bytebuf) {
         return failed
     }
 }
 
 func str.init_from_bytebuf(
-        c_str <- readonly byte array,
-        c_str_len <- size
-        ) failable {
-    if c_str_len < str_stack_bytes {
+        c_str <- readonly byte array
+        ) failable override {
+    var str_len <- size
+    if c_str.len == array_size_unset {
+        str_len = c_str_nulpos(c_str.data)
+    } else {
+        str_len = c_str.len
+    }
+    if str_len < str_stack_bytes {
         c_stdlib.memcpy(
-            c_str, self._stack_buf, c_str_len + 1
+            c_str.data, self._stack_buf, str_len
         )
-        self._stack_buf_len = c_str_len
-        return self
+        c_str.data[str_len] = 0
+        self._stack_buf_len = str_len + 1
+        return
     }
     self._on_heap = yes
-    self._heap_buf = alloc(c_str_len + 1)
-    if self._heap_buf == none {
-        return none
+    #self._heap_buf = alloc_array(self._heap_buf, str_len + 1)  # FIXME.
+    self._heap_buf.data = alloc(str_len + 1)
+    if failed(alloc) {
+        return failed
     }
     memcpy(
-        self._heap_buf, c_str, c_str_len + 1
+        self._heap_buf.data, c_str.data, str_len
     )
-    self._heap_buf_len = c_str_len
-    return self
+    self._heap_buf.data[str_len] = 0
+    self._heap_buf.len = str_len + 1
 }
 
 func str.init failable {
@@ -96,15 +108,17 @@ func str.add(other_str <- readonly str) failable {
     if other_str._on_heap {
         other_data = other_str._heap_buf
     }
-    return self.add(other_data, other_len - 1)
+    var other_array <- readonly byte array =
+        as(readonly byte array, other_data)
+    other_array.len = other_len
+    return self.add(other_array)
 }
 
 func str.add_bytebuf(
-        c_str <- readonly byte array,
-        c_str_len <- size
-        ) failable {
+        c_str <- readonly byte array
+        ) failable override {
     var own_len <- size = self.len
-    var needed_len <- size = c_str_len + own_len + 1
+    var needed_len <- size = c_str.len + own_len + 1
     if self._on_heap or needed_len > str_stack_bytes {
         var self_data <- byte array = self._stack_buf
         var clear_ptr <- byte array = none
@@ -112,29 +126,30 @@ func str.add_bytebuf(
             self_data = self._heap_buf
             clear_ptr = self._heap_buf
         }
-        self._heap_buf = alloc(needed_len)
-        if self._heap_buf == none {
-            return none
+        self._heap_buf.data = alloc(needed_len)
+        if failed(alloc) {
+            self._heap_buf.data = clear_ptr
+            return failed
         }
-        memcpy(self._heap_buf, self_data, own_len)
+        memcpy(self_data, self._heap_buf, own_len)
         memcpy(
-            self._heap_buf + own_len, c_str, c_str_len
+            c_str, self._heap_buf + own_len, c_str_len
         )
-        self._heap_buf[own_len + c_str_len + 1] = '\0'
-        unalloc(clear_ptr)
-        self._heap_buf_len = needed_len
-        return self
+        self._heap_buf[own_len + c_str_len + 1] = 0
+        unalloc(clear_ptr.data)
+        self._heap_buf.len = needed_len
+        return
     }
     memcpy(
-        c_str, self._stack_buf + own_len, c_str_len
+        c_str, self._stack_buf.data + own_len, c_str_len
     )
-    self._stack_buf[own_len + c_str_len + 1] = '\0'
-    return self
+    self._stack_buf[own_len + c_str_len + 1] = 0
+    self._stack_buf.len = needed_len
 }
 
 func str.len -> size {
     if self._on_heap {
-        return self._heap_buf_len - 1
+        return self._heap_buf.len - 1
     }
     return self._stack_buf_len - 1
 }
@@ -147,39 +162,45 @@ func str.destroy {
 
 func str.copy_from(other_str <- readonly str) -> str ref {
     if not other_str._on_heap {
+        if self._on_heap {
+            unalloc(self._heap_buf.data)
+        }
         memcpy(
             as_ref(other_str), as_ref(self), sizeof(self)
         )
     } else {
         self._on_heap = yes
         self._heap_buf = alloc(
-            other_str._heap_buf_len
+            other_str._heap_buf.len
         )
         if self._heap_buf == none {
             return none
         }
         memcpy(
             other_str._heap_buf,
-            self._heap_buf,
-            other_str.heap_buf_len
+            self._heap_buf.data,
+            other_str.heap_buf.len
         )
-        self._heap_buf_len = other_str._heap_buf_len
+        self._heap_buf.len = other_str._heap_buf.len
     }
     return str
 }
 
-func str.get_c_str -> readonly byte array {
+func str.get_c_str -> readonly byte c_array {
+    var result <- readonly byte c_array
     if self._on_heap {
-        return self._heap_buf
+        result = self._heap_buf.data
+        return result
     }
-    return self._stack_buf
+    result = as(readonly byte c_array, self._stack_buf)
+    return result
 }
 
-func c_str_nulpos(str_ref <- readonly byte array) -> size {
+func c_str_nulpos(str_ref <- readonly byte c_array) -> size {
     return c_stdlib.strlen(str_ref)
 }
 
-func memcpy(origin <- readonly byte array, dest <- byte array,
+func memcpy(origin <- readonly byte c_array, dest <- byte c_array,
             amount <- size) {
     c_stdlib.memmove(dest, origin, amount)
 }
