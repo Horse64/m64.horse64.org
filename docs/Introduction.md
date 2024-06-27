@@ -74,7 +74,7 @@ which can e.g. be used for safe resource cleanup.
 
 ### OOP with structs
 
-While Horse64's default user type is the `type` statement
+While Horse64's approach to user types is the `type` statement
 which allows complex **object-oriented programming (OOP)**,
 Moose64's **default user type is the `struct`** statement.
 
@@ -86,13 +86,19 @@ are passed by reference.
 Also, structs don't allow any inheritance when using
 object-oriented functions.
 
+However, structs can be populated with func attributes
+via `func name_of_struct.func_attr_name ...` just like in
+Horse64, and extending structs via `extend struct` also
+works just like in Horse64. Therefore, other than type
+inheritance, all basic object-oriented pattern are available.
+
 
 ### Function calls and overrides
 
 Unlike Horse64, Moose64 does **not allow so-called "keyword
-arguments with default values**. However, Moose64 **has
-function overriding** for func attributes
-on [structs](#oop-with-structs):
+arguments"** that specify any default values. However,
+Moose64 **has function overriding** for func attributes
+on [structs](#oop-with-structs), which works as follows:
 
 ```Moose64
 struct MyTestStruct {
