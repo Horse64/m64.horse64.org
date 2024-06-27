@@ -79,7 +79,7 @@ Usually, this is achieved by:
   }
   defer s.destroy()
   # ...use `s` string here for whatever purpose...
-  ````
+  ```
 
 - for allocated buffers or struct [`ref`s or `c_array`s](#ref-types),
   by using a `defer std.unalloc(x)` right after some
