@@ -83,11 +83,11 @@ func str.init_from_bytebuf(
         return
     }
     self._on_heap = yes
-    #self._heap_buf = alloc_array(size_of(deref(self._heap_buf)),
-    #    str_len + 1
-    #)  # FIXME.
-    self._heap_buf.data = alloc(str_len + 1)
-    if failed(alloc) {
+    self._heap_buf = alloc_array(
+        size_of(deref(self._heap_buf)),
+        str_len + 1
+    )
+    if failed(alloc_array) {
         return failed
     }
     memcpy(
@@ -165,7 +165,7 @@ func str.destroy {
     }
 }
 
-func str.copy_from(other_str <- readonly str) -> str ref {
+func str.copy_from(other_str <- readonly str) failable {
     if not other_str._on_heap {
         if self._on_heap {
             unalloc(self._heap_buf.data)
@@ -179,7 +179,7 @@ func str.copy_from(other_str <- readonly str) -> str ref {
             other_str._heap_buf.len
         )
         if self._heap_buf == none {
-            return none
+            return failed
         }
         memcpy(
             other_str._heap_buf,
@@ -188,7 +188,6 @@ func str.copy_from(other_str <- readonly str) -> str ref {
         )
         self._heap_buf.len = other_str._heap_buf.len
     }
-    return str
 }
 
 func str.get_c_str -> readonly byte c_array {
@@ -210,11 +209,30 @@ func memcpy(origin <- readonly byte c_array, dest <- byte c_array,
     c_stdlib.memmove(dest, origin, amount)
 }
 
-func alloc(amount <- size) -> any ref {
-    return c_stdlib.malloc(amount)
+func alloc(amount <- size) -> any ref failable {
+    var result <- any ref = c_stdlib.malloc(amount)
+    if result == none {
+        return failed
+    }
+    return result
 }
 
-func unalloc(ptr <- any array) -> any ref {
-    return c_stdlib.free(ptr)
+func alloc_array(item_size <- size, item_count <- size
+                ) -> any array failable {
+    var result <- any array
+    if item_count > 0 {
+        result.data = c_stdlib.malloc(
+            item_size * item_count
+        )
+        if result.data == none {
+            return failed
+        }
+    }
+    result.len = item_count
+    return result
+}
+
+func unalloc(ptr <- any array) {
+    c_stdlib.free(ptr)
 }
 
