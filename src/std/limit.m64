@@ -25,7 +25,5 @@
 # Alternatively, at your option, this file is offered under the Apache 2
 # license, see accompanied LICENSE.md.
 
-const size_max <- 9223372036854775807
-
-const array_size_unset = size_max
+const size_max <- u64 = 9223372036854775807
 
