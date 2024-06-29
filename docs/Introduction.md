@@ -96,7 +96,7 @@ Usually, this is achieved by:
 
   ```Moose64
   
-  var s <- byte array = std.alloc_array(std.size_of_type(byte), 256)
+  var s <- byte array = std.alloc_array(std.size_of(std.deref(s)), 256)
   defer std.unalloc_array(s)
   # ...use `s` array here for whatever purpose...
   ```
