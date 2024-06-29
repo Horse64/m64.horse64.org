@@ -53,6 +53,7 @@ This is a syntax highlighting intended for kate and other KDE editors.
       <item>with</item>
       <item>failed</item>
       <item>failable</item>
+      <item>override</item>
       <item>as</item>
       <item>func</item>
       <item>type</item>
