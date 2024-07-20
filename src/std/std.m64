@@ -37,7 +37,7 @@ const array_size_unset <- size = limit.size_max
 struct str {
     union {
         struct {
-            var _stack_buf <- byte array[str_stack_bytes]
+            var _stack_buf <- byte c_array[str_stack_bytes]
             var _stack_buf_len <- u16
         }
         struct {
@@ -50,7 +50,10 @@ struct str {
 func str.init_as_copy(
         other_str <- readonly str
         ) failable override {
-    return self.copy_from(other_str)
+    self.copy_from(other_str)
+    if failed(self.copy_from) {
+        return failed
+    }
 }
 
 func str.init_from_inline_c_str(
@@ -201,7 +204,12 @@ func str.get_c_str -> readonly byte c_array {
 }
 
 func c_str_nulpos(str_ref <- readonly byte c_array) -> size {
-    return c_stdlib.strlen(str_ref)
+    var amount <- size = c_stdlib.strlen(str_ref)
+    if amount == limit.size_max {
+        # XXX: avoid clash with array_size_unset!
+        amount = limit.size_max - 1
+    }
+    return amount
 }
 
 func memcpy(origin <- readonly byte c_array, dest <- byte c_array,
@@ -234,5 +242,39 @@ func alloc_array(item_size <- size, item_count <- size
 
 func unalloc(ptr <- any array) {
     c_stdlib.free(ptr)
+}
+
+func print(data <- readonly byte array) {
+    var print_amount <- size = buffer.len
+    if print_amount == array_size_unset {
+        print_amount = c_str_nulpos(buffer.data)
+    }
+    print_c_array(data.data, print_amount)
+}
+
+func print_c_array(data <- readonly byte c_array,
+        data_len <- size) override {
+    var i <- size = 0
+    while i < data_len {
+        c_stdlib.printf(
+            "%c", buffer.data[i]
+        )
+        i += 1
+    }
+    c_stdlib.printf("\n")
+}
+
+func print_str(my_str <- str) override {
+    if str._on_heap {
+        print_c_array(
+            str._heap_buf.data,
+            str._heap_buf.len - 1
+        )
+    } else {
+        print_c_array(
+            str._stack_buf,
+            str._stack_buf_len
+        )
+    }
 }
 
