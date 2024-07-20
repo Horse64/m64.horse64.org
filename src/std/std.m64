@@ -184,7 +184,7 @@ func str.copy_from(other_str <- readonly str) failable {
         memcpy(
             other_str._heap_buf,
             self._heap_buf.data,
-            other_str.heap_buf.len
+            other_str._heap_buf.len
         )
         self._heap_buf.len = other_str._heap_buf.len
     }
