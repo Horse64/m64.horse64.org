@@ -149,13 +149,13 @@ func str.add_bytebuf(
         return
     }
     memcpy(
-        c_str, self._stack_buf.data + own_len, c_str.len
+        c_str, self._stack_buf + own_len, c_str.len
     )
     self._stack_buf[own_len + c_str.len + 1] = 0
-    self._stack_buf.len = needed_len
+    self._stack_buf_len = needed_len
 }
 
-func str.len -> size {
+func str.len readonly -> size {
     if self._on_heap {
         return self._heap_buf.len - 1
     }
@@ -193,7 +193,7 @@ func str.copy_from(other_str <- readonly str) failable {
     }
 }
 
-func str.get_c_str -> readonly byte c_array {
+func str.get_c_str readonly -> readonly byte c_array {
     var result <- readonly byte c_array
     if self._on_heap {
         result = self._heap_buf.data
@@ -217,7 +217,7 @@ func memcpy(origin <- readonly byte c_array, dest <- byte c_array,
     c_stdlib.memmove(dest, origin, amount)
 }
 
-func alloc(amount <- size) -> any ref failable {
+func alloc(amount <- size) failable -> any ref {
     var result <- any ref = c_stdlib.malloc(amount)
     if result == none {
         return failed
@@ -226,7 +226,7 @@ func alloc(amount <- size) -> any ref failable {
 }
 
 func alloc_array(item_size <- size, item_count <- size
-                ) -> any array failable {
+                ) failable -> any array {
     var result <- any array
     if item_count > 0 {
         result.data = c_stdlib.malloc(
@@ -245,9 +245,9 @@ func unalloc(ptr <- any array) {
 }
 
 func print(data <- readonly byte array) {
-    var print_amount <- size = buffer.len
+    var print_amount <- size = data.len
     if print_amount == array_size_unset {
-        print_amount = c_str_nulpos(buffer.data)
+        print_amount = c_str_nulpos(data.data)
     }
     print_c_array(data.data, print_amount)
 }
@@ -257,7 +257,7 @@ func print_c_array(data <- readonly byte c_array,
     var i <- size = 0
     while i < data_len {
         c_stdlib.printf(
-            "%c", buffer.data[i]
+            "%c", data[i]
         )
         i += 1
     }
@@ -266,15 +266,19 @@ func print_c_array(data <- readonly byte c_array,
 
 func print_str(my_str <- str) override {
     if str._on_heap {
-        print_c_array(
-            str._heap_buf.data,
-            str._heap_buf.len - 1
-        )
+        if str._heap_buf.len > 1 {
+            print_c_array(
+                str._heap_buf.data,
+                str._heap_buf.len - 1
+            )
+        }
     } else {
-        print_c_array(
-            str._stack_buf,
-            str._stack_buf_len
-        )
+        if str._stack_buf_len > 1 {
+            print_c_array(
+                str._stack_buf,
+                str._stack_buf_len
+            )
+        }
     }
 }
 
