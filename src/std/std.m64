@@ -87,7 +87,7 @@ func str.init_from_bytebuf(
     }
     self._on_heap = yes
     self._heap_buf = alloc_array(
-        size_of(deref(self._heap_buf)),
+        size_of(deref(self._heap_buf.data)),
         str_len + 1
     )
     if failed(alloc_array) {
@@ -116,7 +116,10 @@ func str.add(other_str <- readonly str) failable {
     var other_array <- readonly byte array =
         as(readonly byte array, other_data)
     other_array.len = other_len
-    return self.add(other_array)
+    self.add(other_array)
+    if failed(self.add) {
+        return failed
+    }
 }
 
 func str.add_bytebuf(
@@ -141,7 +144,7 @@ func str.add_bytebuf(
         }
         memcpy(self_data, self._heap_buf, own_len)
         memcpy(
-            c_str, self._heap_buf + own_len, c_str.len
+            c_str, self._heap_buf.data + own_len, c_str.len
         )
         self._heap_buf[own_len + c_str.len + 1] = 0
         unalloc(clear_ptr.data)
@@ -181,7 +184,7 @@ func str.copy_from(other_str <- readonly str) failable {
         self._heap_buf = alloc(
             other_str._heap_buf.len
         )
-        if self._heap_buf == none {
+        if failed(alloc) {
             return failed
         }
         memcpy(
