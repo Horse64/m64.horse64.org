@@ -144,7 +144,7 @@ func str.add_bytebuf(
         }
         memcpy(self_data, self._heap_buf, own_len)
         memcpy(
-            c_str, self._heap_buf.data + own_len, c_str.len
+            c_str.data, self._heap_buf.data + own_len, c_str.len
         )
         self._heap_buf[own_len + c_str.len + 1] = 0
         unalloc(clear_ptr.data)
@@ -152,7 +152,7 @@ func str.add_bytebuf(
         return
     }
     memcpy(
-        c_str, self._stack_buf + own_len, c_str.len
+        c_str.data, self._stack_buf + own_len, c_str.len
     )
     self._stack_buf[own_len + c_str.len + 1] = 0
     self._stack_buf_len = needed_len
@@ -167,7 +167,7 @@ func str.len readonly -> size {
 
 func str.destroy {
     if self._on_heap {
-        unalloc(self._heap_buf)
+        unalloc(self._heap_buf.data)
     }
 }
 
@@ -179,6 +179,7 @@ func str.copy_from(other_str <- readonly str) failable {
         memcpy(
             as_ref(other_str), as_ref(self), size_of(self)
         )
+        assert(not self._on_heap)
     } else {
         self._on_heap = yes
         self._heap_buf = alloc(
@@ -215,7 +216,7 @@ func c_str_nulpos(str_ref <- readonly byte c_array) -> size {
     return amount
 }
 
-func memcpy(origin <- readonly byte c_array, dest <- byte c_array,
+func memcpy(origin <- readonly any ref, dest <- any ref,
             amount <- size) {
     c_stdlib.memmove(dest, origin, amount)
 }
@@ -243,7 +244,7 @@ func alloc_array(item_size <- size, item_count <- size
     return result
 }
 
-func unalloc(ptr <- any array) {
+func unalloc(ptr <- any c_array) {
     c_stdlib.free(ptr)
 }
 
