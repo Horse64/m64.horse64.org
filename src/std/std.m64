@@ -48,7 +48,7 @@ struct str {
 }
 
 func str.init_as_copy(
-        other_str <- readonly str
+        other_str <- readonly str implicit ref
         ) failable override {
     self.copy_from(other_str)
     if failed(self.copy_from) {
@@ -107,7 +107,7 @@ func str.init failable {
     return self
 }
 
-func str.add(other_str <- readonly str) failable {
+func str.add(other_str <- readonly str implicit ref) failable {
     var other_len <- size = other_str.len
     var other_data <- byte array = other_str._stack_buf
     if other_str._on_heap {
@@ -172,7 +172,7 @@ func str.destroy {
     }
 }
 
-func str.copy_from(other_str <- readonly str) failable {
+func str.copy_from(other_str <- readonly str implicit ref) failable {
     if not other_str._on_heap {
         if self._on_heap {
             unalloc(self._heap_buf.data)
@@ -269,7 +269,7 @@ func print_c_array(data <- readonly byte c_array,
     c_stdlib.printf("\n")
 }
 
-func print_str(my_str <- str) override {
+func print_str(my_str <- readonly str implicit ref) override {
     if str._on_heap {
         if str._heap_buf.len > 1 {
             print_c_array(
