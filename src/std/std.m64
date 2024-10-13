@@ -59,8 +59,8 @@ func str.init_as_copy(
 func str.init_from_inline_c_str(
         c_str <- readonly byte c_array
         ) failable override {
-    var c_array <- readonly byte array =
-        as(readonly byte array, c_str)
+    var c_array <- readonly byte array
+    c_array.data = c_str
     c_array.len = c_str_nulpos(c_str)
     self.init_from_bytebuf(c_array)
     if failed(self.init_from_bytebuf) {
@@ -109,12 +109,12 @@ func str.init failable {
 
 func str.add(other_str <- readonly str implicit ref) failable {
     var other_len <- size = other_str.len
-    var other_data <- byte array = other_str._stack_buf
+    var other_data <- byte c_array = other_str._stack_buf
     if other_str._on_heap {
         other_data = other_str._heap_buf
     }
-    var other_array <- readonly byte array =
-        as(readonly byte array, other_data)
+    var other_array <- readonly byte array
+    other_array.data = other_data
     other_array.len = other_len
     self.add(other_array)
     if failed(self.add) {
@@ -178,7 +178,8 @@ func str.copy_from(other_str <- readonly str implicit ref) failable {
             unalloc(self._heap_buf.data)
         }
         memcpy(
-            as_ref(other_str), self, size_of(self)
+            as_ref(other_str), as_ref(self),
+            size_of(self)
         )
         assert(not self._on_heap)
     } else {
