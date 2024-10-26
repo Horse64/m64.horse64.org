@@ -59,10 +59,10 @@ func str.init_as_copy(
 func str.init_from_inline_c_str(
         c_str <- readonly byte c_array
         ) failable override {
-    var c_array <- readonly byte array
-    c_array.data = c_str
-    c_array.len = c_str_nulpos(c_str)
-    self.init_from_bytebuf(c_array)
+    var c_array_var <- readonly byte array
+    c_array_var.data = c_str
+    c_array_var.len = c_str_nulpos(c_str)
+    self.init_from_bytebuf(c_array_var)
     if failed(self.init_from_bytebuf) {
         return failed
     }
