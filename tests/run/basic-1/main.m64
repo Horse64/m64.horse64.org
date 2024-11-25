@@ -1,0 +1,19 @@
+
+c_import "stdio.h" as c_stdlib
+
+func print_c_array(data <- readonly byte c_array,
+        data_len <- size) override {
+    var i <- size = 1
+    while i <= data_len {
+        c_stdlib.printf(
+            "%c", data[i]
+        )
+        i += 1
+    }
+    c_stdlib.printf("\n")
+}
+
+func main {
+    print_c_array("Hello World!", 12)
+}
+
