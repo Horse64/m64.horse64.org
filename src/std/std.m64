@@ -81,7 +81,7 @@ func str.init_from_bytebuf(
         c_stdlib.memcpy(
             c_str.data, self._stack_buf, str_len
         )
-        c_str.data[str_len] = 0
+        c_str.data[str_len + 1] = 0
         self._stack_buf_len = str_len + 1
         return
     }
@@ -96,7 +96,7 @@ func str.init_from_bytebuf(
     memcpy(
         c_str.data, self._heap_buf.data, str_len
     )
-    self._heap_buf.data[str_len] = 0
+    self._heap_buf.data[str_len + 1] = 0
     self._heap_buf.len = str_len + 1
 }
 
@@ -260,8 +260,8 @@ func print(data <- readonly byte array) {
 
 func print_c_array(data <- readonly byte c_array,
         data_len <- size) override {
-    var i <- size = 0
-    while i < data_len {
+    var i <- size = 1
+    while i <= data_len {
         c_stdlib.printf(
             "%c", data[i]
         )
