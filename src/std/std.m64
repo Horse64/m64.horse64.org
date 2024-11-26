@@ -81,7 +81,7 @@ func str.init_from_bytebuf(
         c_stdlib.memcpy(
             c_str.data, self._stack_buf, str_len
         )
-        c_str.data[str_len + 1] = 0
+        self._stack_buf[str_len + 1] = 0
         self._stack_buf_len = str_len + 1
         return
     }
@@ -96,7 +96,7 @@ func str.init_from_bytebuf(
     memcpy(
         c_str.data, self._heap_buf.data, str_len
     )
-    self._heap_buf.data[str_len + 1] = 0
+    self._heap_buf[str_len + 1] = 0
     self._heap_buf.len = str_len + 1
 }
 
