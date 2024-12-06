@@ -78,8 +78,8 @@ func str.init_from_bytebuf(
         str_len = c_str.len
     }
     if str_len < str_stack_bytes {
-        c_stdlib.memcpy(
-            c_str.data, self._stack_buf, str_len
+        memcpy(
+            self._stack_buf, c_str.data, str_len
         )
         self._stack_buf[str_len + 1] = 0
         self._stack_buf_len = str_len + 1
@@ -135,7 +135,7 @@ func str.add_bytebuf(
         var self_data <- byte c_array = self._stack_buf
         var clear_data <- byte c_array = none
         if self._on_heap {
-            self_data = self._heap_buf
+            self_data = self._heap_buf.data
             clear_data = self._heap_buf.data
         }
         self._heap_buf.data = alloc(needed_len)
