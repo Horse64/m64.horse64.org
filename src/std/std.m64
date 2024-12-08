@@ -104,14 +104,13 @@ func str.init failable {
     self._on_heap = no
     self._stack_buf[1] = 0
     self._stack_buf_len = 1
-    return self
 }
 
 func str.add(other_str <- readonly str implicit ref) failable {
     var other_len <- size = other_str.len
     var other_data <- byte c_array = other_str._stack_buf
     if other_str._on_heap {
-        other_data = other_str._heap_buf
+        other_data = other_str._heap_buf.data
     }
     var other_array <- readonly byte array
     other_array.data = other_data
@@ -191,7 +190,7 @@ func str.copy_from(other_str <- readonly str implicit ref) failable {
             return failed
         }
         memcpy(
-            other_str._heap_buf,
+            other_str._heap_buf.data,
             self._heap_buf.data,
             other_str._heap_buf.len
         )
