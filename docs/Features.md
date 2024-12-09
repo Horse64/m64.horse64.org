@@ -5,14 +5,20 @@ Features of Moose64
 
 Moose64 has the following features:
 
+- Simpler than C++, but still has competent object-orientied
+  programming (OOP),
+
+- Borrows its syntax and approachable look from [Horse64](
+  https://horse64.org/),
+
+- Great C inter-operability,
+
 - Expert manual memory management as found in many
-  systems programming languages.
+  systems programming languages,
 
-- Integrated simple object-oriented programming.
+- Quality-of-life features like `defer`,
 
-- Quality-of-life features like `defer`.
-
-- Readable syntax heavily borrowing from Horse64.
+- Avoids exceptions with instead a simpler `failable` handling,
 
 - Amazing integration with the Horse64 ecosystem.
 
