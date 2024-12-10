@@ -59,13 +59,20 @@ func str.init_as_copy(
 func str.init_from_inline_c_str(
         c_str <- readonly byte c_array
         ) failable override {
-    var c_array_var <- readonly byte array
+    var c_array_var <- readonly byte array = alloc_array(
+        1, 0
+    )
+    if failed(alloc_array) {
+        return failed
+    }
     c_array_var.data = c_str
     c_array_var.len = c_str_nulpos(c_str)
     self.init_from_bytebuf(c_array_var)
     if failed(self.init_from_bytebuf) {
         return failed
     }
+    c_array_var.data = none
+    unalloc_array(c_array_var)
 }
 
 func str.init_from_bytebuf(
@@ -86,6 +93,9 @@ func str.init_from_bytebuf(
         return
     }
     self._on_heap = yes
+    if self._heap_buf != none {
+        unalloc_array(self._heap_buf)
+    }
     self._heap_buf = alloc_array(
         size_of(self._heap_buf.data),
         str_len + 1
@@ -233,19 +243,40 @@ func alloc(amount <- size) failable -> any ref {
 func alloc_array(item_size <- size, item_count <- size
                 ) failable -> any array {
     var result <- any array
-    if item_count > 0 {
+    var array_addr <- any ref = c_stdlib.malloc(
+        size_of(result)
+    )
+    if array_addr == none {
+        return failed
+    }
+    c_stdlib.memset(array_addr, 0, size_of(result))
+    result = as(any array, array_addr)
+    if item_count > 0 and item_size > 0 {
         result.data = c_stdlib.malloc(
             item_size * item_count
         )
         if result.data == none {
+            c_stdlib.free(array_addr)
             return failed
         }
+        c_stdlib.memset(result.data, 0,
+            item_size * item_count)
     }
     result.len = item_count
     return result
 }
 
 func unalloc(ptr <- any c_array) {
+    c_stdlib.free(ptr)
+}
+
+func unalloc_array(ptr <- any array) {
+    if ptr == none {
+        return
+    }
+    if ptr.data != none {
+        c_stdlib.free(ptr.data)
+    }
     c_stdlib.free(ptr)
 }
 
@@ -266,7 +297,7 @@ func print_c_array(data <- readonly byte c_array,
         )
         i += 1
     }
-    c_stdlib.printf("\n")
+    c_stdlib.printf("%s", "\n")
 }
 
 func print_str(my_str <- readonly str implicit ref) override {
