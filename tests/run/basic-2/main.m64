@@ -25,21 +25,28 @@
 # Alternatively, at your option, this file is offered under the Apache 2
 # license, see accompanied LICENSE.md.
 
-c_import "stdio.h" as c_stdlib
+c_import "stdio.h" as c_stdio
 
-func print_c_array(data <- readonly byte c_array,
-        data_len <- size) override {
-    var i <- size = 1
-    while i <= data_len {
-        c_stdlib.printf(
-            "%c", data[i]
-        )
+import std from m64.horse64.org
+
+func main -> i32 {
+    #c_stdio.printf("%s\n", "This is a test!")
+    var s <- std.str("Hello World!")
+    if failed(std.str) {
+        return -1
+    }
+    defer s.destroy()
+    if 2 > 3 {
+        return 14 + 35
+    }
+    std.print(s)
+    var i <- i32 = 1
+    while i < 5 {
+        if i > 10 {
+            return -1
+        }
         i += 1
     }
-    c_stdlib.printf("\n")
-}
-
-func main {
-    print_c_array("Hello World!", 12)
+    return 0
 }
 
