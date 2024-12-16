@@ -149,6 +149,8 @@ This is a syntax highlighting intended for kate and other KDE editors.
          String="import" additionalDeliminator="."/>
         <WordDetect attribute="Import" context="CImport"
          String="c_import" additionalDeliminator="."/>
+        <WordDetect attribute="Control" context="DoCStmt"
+         String="do" additionalDeliminator="."/>
         <keyword attribute="BuiltinFunc" context="#stay" String="builtinfunc"/>
         <keyword attribute="BuiltinVar" context="#stay" String="builtinvar"/>
 
@@ -200,6 +202,35 @@ This is a syntax highlighting intended for kate and other KDE editors.
          char="-" char1="&gt;"/>
         <AnyChar attribute="OperatorSymbol" context="#stay"
          String=".=~+-*/%&amp;|^&gt;&lt;"/>
+      </context>
+      
+      <context name="DoCStmt" attribute="Import"
+          fallthroughContext="#pop" lineEndContext="#stay">
+        <DetectSpaces/>
+        <keyword String="keywords" context="#pop" lookAhead="true"/>
+        <keyword String="nameditemkeywords" context="#pop"
+         lookAhead="true"/>
+        <DetectChar attribute="Strings" context="StringDouble" char="&quot;"/>
+        <RegExpr attribute="Strings" context="StringDouble" String="b&quot;"/>
+        <DetectChar attribute="Strings" context="StringSingle"
+         char="'"/>
+        <RegExpr attribute="Strings" context="StringSingle"
+         String="b'"/>
+        <DetectChar char="{" attribute="OperatorSymbol"
+         context="#pop!DoCStmtBlock"/>
+      </context>
+      
+      <context name="DoCStmtBlock" attribute="Import"
+          fallthroughContext="#pop" lineEndContext="#stay">
+        <DetectSpaces/>
+        <RegExpr attribute="Strings" String="[^\}\{\'\&quot;]"/>
+        <DetectChar attribute="Strings" context="StringDouble" char="&quot;"/>
+        <DetectChar attribute="Strings" context="StringSingle"
+         char="'"/>
+        <DetectChar char="{" attribute="OperatorSymbol"
+         context="DoCStmtBlock"/>
+        <DetectChar char="}" attribute="OperatorSymbol"
+         context="#pop"/>
       </context>
 
       <context name="NamedItemVarHadName" attribute="Import"
