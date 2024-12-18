@@ -1,0 +1,97 @@
+## @module mem
+# Copyright (c) 2024, ellie/@ell1e & m64 stdlib authors (see AUTHORS.md).
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+# 1. Redistributions of source code must retain the above copyright notice,
+#    this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright notice,
+#    this list of conditions and the following disclaimer in the documentation
+#    and/or other materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+#
+# Alternatively, at your option, this file is offered under the Apache 2
+# license, see accompanied LICENSE.md.
+
+func c_str_nulpos(str_ref <- readonly byte c_array) -> size {
+    var amount <- size = c_stdlib.strlen(str_ref)
+    if amount == limit.size_max {
+        # XXX: avoid clash with array_size_unset!
+        amount = limit.size_max - 1
+    }
+    return amount
+}
+
+func memcpy(origin <- readonly any ref, dest <- any ref,
+            amount <- size) {
+    c_stdlib.memmove(dest, origin, amount)
+}
+
+func alloc(amount <- size) failable -> any ref {
+    var result <- any ref = c_stdlib.malloc(amount)
+    if result == none {
+        return failed
+    }
+    return result
+}
+
+func alloc_array(item_size <- size, item_count <- size
+                ) failable -> any array {
+    var result <- any array
+    var array_addr <- any ref = c_stdlib.malloc(
+        size_of(result)
+    )
+    if array_addr == none {
+        return failed
+    }
+    c_stdlib.memset(array_addr, 0, size_of(result))
+    result = as(any array, array_addr)
+    if item_count > 0 and item_size > 0 {
+        result.data = c_stdlib.malloc(
+            item_size * item_count
+        )
+        if result.data == none {
+            c_stdlib.free(array_addr)
+            return failed
+        }
+        c_stdlib.memset(result.data, 0,
+            item_size * item_count)
+    }
+    result.len = item_count
+    return result
+}
+
+func unalloc(ptr <- any c_array) {
+    c_stdlib.free(ptr)
+}
+
+func unalloc_array_with_readonly_data(
+        ptr <- readonly any array) override {
+    if ptr == none {
+        return
+    }
+    c_stdlib.free(ptr)
+}
+
+func unalloc_array(ptr <- any array) {
+    if ptr == none {
+        return
+    }
+    if ptr.data != none {
+        c_stdlib.free(ptr.data)
+    }
+    c_stdlib.free(ptr)
+}
+

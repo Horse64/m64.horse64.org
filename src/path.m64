@@ -1,4 +1,4 @@
-## @module std.io
+## @module path
 # Copyright (c) 2024, ellie/@ell1e & m64 stdlib authors (see AUTHORS.md).
 #
 # Redistribution and use in source and binary forms, with or without
@@ -25,6 +25,8 @@
 # Alternatively, at your option, this file is offered under the Apache 2
 # license, see accompanied LICENSE.md.
 
-prep{c_defs.SPEW3D_OPTION_DISABLE_SDL=1}
-c_import "spew3d.horse64.org/include/spew3d.h" as c_spew3d
+#prep{c_defs.SPEW3D_IMPLEMENTATION=1}
+#prep{c_defs.SPEW3D_OPTION_DISABLE_SDL=1}
+#c_import "spew3d.horse64.org/include/spew3d.h" as c_spew3d
+#prep{c_defs.SPEW3D_IMPLEMENTATION=0}
 

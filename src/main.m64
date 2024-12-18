@@ -25,15 +25,16 @@
 # Alternatively, at your option, this file is offered under the Apache 2
 # license, see accompanied LICENSE.md.
 
-import std from m64.horse64.org
+import io from m64.horse64.org
+import str from m64.horse64.org
 
 func main -> i32 {
-    var s <- std.str("Hello World!")
-    if failed(std.str) {
+    var s <- str.str("Hello World!")
+    if failed(str.str) {
         return -1
     }
     defer s.destroy()
-    std.print(s)
+    io.print(s)
     return 0
 }
 
