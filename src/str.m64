@@ -59,20 +59,20 @@ func str.init_as_copy(
 func str.init_from_inline_c_str(
         c_str <- readonly byte c_array
         ) failable override {
-    var c_array_var <- readonly byte array = alloc_array(
+    var c_array_var <- readonly byte array = mem.alloc_array(
         1, 0
     )
-    if failed(alloc_array) {
+    if failed(mem.alloc_array) {
         return failed
     }
     c_array_var.data = c_str
-    c_array_var.len = c_str_nulpos(c_str)
+    c_array_var.len = mem.c_str_nulpos(c_str)
     self.init_from_bytebuf(c_array_var)
     if failed(self.init_from_bytebuf) {
         return failed
     }
     c_array_var.data = none
-    unalloc_array(c_array_var)
+    mem.unalloc_array(c_array_var)
 }
 
 func str.init_from_bytebuf(
@@ -80,7 +80,7 @@ func str.init_from_bytebuf(
         ) failable override {
     var str_len <- size
     if c_str.len == array_size_unset {
-        str_len = c_str_nulpos(c_str.data)
+        str_len = mem.c_str_nulpos(c_str.data)
     } else {
         str_len = c_str.len
     }
@@ -94,16 +94,16 @@ func str.init_from_bytebuf(
     }
     self._on_heap = yes
     if self._heap_buf != none {
-        unalloc_array(self._heap_buf)
+        mem.unalloc_array(self._heap_buf)
     }
-    self._heap_buf = alloc_array(
+    self._heap_buf = mem.alloc_array(
         size_of(self._heap_buf.data),
         str_len + 1
     )
-    if failed(alloc_array) {
+    if failed(mem.alloc_array) {
         return failed
     }
-    memcpy(
+    mem.memcpy(
         c_str.data, self._heap_buf.data, str_len
     )
     self._heap_buf[str_len + 1] = 0
@@ -137,7 +137,7 @@ func str.add_bytebuf(
         ) failable override {
     var c_str_len <- size = c_str.len
     if c_str_len == array_size_unset {
-        c_str_len = c_str_nulpos(c_str.data)
+        c_str_len = mem.c_str_nulpos(c_str.data)
     }
     var own_len <- size = self.len
     var needed_len <- size = c_str_len + own_len + 1
@@ -148,21 +148,21 @@ func str.add_bytebuf(
             self_data = self._heap_buf.data
             clear_data = self._heap_buf.data
         }
-        self._heap_buf.data = alloc(needed_len)
-        if failed(alloc) {
+        self._heap_buf.data = mem.alloc(needed_len)
+        if failed(mem.alloc) {
             self._heap_buf.data = clear_data
             return failed
         }
-        memcpy(self_data, self._heap_buf.data, own_len)
-        memcpy(
+        mem.memcpy(self_data, self._heap_buf.data, own_len)
+        mem.memcpy(
             c_str.data, self._heap_buf.data + own_len, c_str_len
         )
         self._heap_buf[own_len + c_str_len + 1] = 0
-        unalloc(clear_data)
+        mem.unalloc(clear_data)
         self._heap_buf.len = needed_len
         return
     }
-    memcpy(
+    mem.memcpy(
         c_str.data, self._stack_buf + own_len, c_str_len
     )
     self._stack_buf[own_len + c_str_len + 1] = 0
@@ -178,26 +178,26 @@ func str.len readonly -> size {
 
 func str.destroy {
     if self._on_heap {
-        unalloc_array(self._heap_buf)
+        mem.unalloc_array(self._heap_buf)
     }
 }
 
 func str.copy_from(other_str <- readonly str implicit ref) failable {
     if not other_str._on_heap {
         if self._on_heap {
-            unalloc_array(self._heap_buf)
+            mem.unalloc_array(self._heap_buf)
         }
         memcpy(
             as_ref(other_str), as_ref(self),
-            size_of(self)
+            mem.size_of(self)
         )
         assert(not self._on_heap)
     } else {
         if self._on_heap {
-            unalloc_array(self._heap_buf)
+            mem.unalloc_array(self._heap_buf)
         }
         self._on_heap = yes
-        self._heap_buf = alloc_array(
+        self._heap_buf = mem.alloc_array(
             1, other_str._heap_buf.len
         )
         if failed(alloc_array) {
