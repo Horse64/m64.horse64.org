@@ -29,10 +29,10 @@ c_import "stdlib.h" as c_stdlib
 c_import "stdio.h" as c_stdlib
 c_import "string.h" as c_stdlib
 
-import std.limit as limit
+import limit from m64.horse64.org
+import mem from m64.horse64.org
 
 const str_stack_bytes <- size = 32
-const array_size_unset <- size = limit.size_max
 
 struct str {
     union {
@@ -79,13 +79,13 @@ func str.init_from_bytebuf(
         c_str <- readonly byte array
         ) failable override {
     var str_len <- size
-    if c_str.len == array_size_unset {
+    if c_str.len == mem.array_size_unset {
         str_len = mem.c_str_nulpos(c_str.data)
     } else {
         str_len = c_str.len
     }
     if str_len < str_stack_bytes {
-        memcpy(
+        mem.memcpy(
             c_str.data, self._stack_buf, str_len
         )
         self._stack_buf[str_len + 1] = 0
@@ -97,7 +97,7 @@ func str.init_from_bytebuf(
         mem.unalloc_array(self._heap_buf)
     }
     self._heap_buf = mem.alloc_array(
-        size_of(self._heap_buf.data),
+        mem.size_of(self._heap_buf.data),
         str_len + 1
     )
     if failed(mem.alloc_array) {
@@ -136,7 +136,7 @@ func str.add_bytebuf(
         c_str <- readonly byte array
         ) failable override {
     var c_str_len <- size = c_str.len
-    if c_str_len == array_size_unset {
+    if c_str_len == mem.array_size_unset {
         c_str_len = mem.c_str_nulpos(c_str.data)
     }
     var own_len <- size = self.len
@@ -187,7 +187,7 @@ func str.copy_from(other_str <- readonly str implicit ref) failable {
         if self._on_heap {
             mem.unalloc_array(self._heap_buf)
         }
-        memcpy(
+        mem.memcpy(
             as_ref(other_str), as_ref(self),
             mem.size_of(self)
         )
@@ -200,10 +200,10 @@ func str.copy_from(other_str <- readonly str implicit ref) failable {
         self._heap_buf = mem.alloc_array(
             1, other_str._heap_buf.len
         )
-        if failed(alloc_array) {
+        if failed(mem.alloc_array) {
             return failed
         }
-        memcpy(
+        mem.memcpy(
             other_str._heap_buf.data,
             self._heap_buf.data,
             other_str._heap_buf.len

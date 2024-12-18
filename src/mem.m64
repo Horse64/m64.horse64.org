@@ -25,6 +25,14 @@
 # Alternatively, at your option, this file is offered under the Apache 2
 # license, see accompanied LICENSE.md.
 
+c_import "stdlib.h" as c_stdlib
+c_import "stdio.h" as c_stdlib
+c_import "string.h" as c_stdlib
+
+import limit from m64.horse64.org
+
+const array_size_unset <- size = limit.size_max
+
 func c_str_nulpos(str_ref <- readonly byte c_array) -> size {
     var amount <- size = c_stdlib.strlen(str_ref)
     if amount == limit.size_max {

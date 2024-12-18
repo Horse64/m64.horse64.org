@@ -28,10 +28,17 @@
 #prep{c_defs.SPEW3D_OPTION_DISABLE_SDL=1}
 #c_import "spew3d.horse64.org/include/spew3d.h" as c_spew3d
 
+c_import "stdlib.h" as c_stdlib
+c_import "stdio.h" as c_stdlib
+c_import "string.h" as c_stdlib
+
+import mem from m64.horse64.org
+import str from m64.horse64.org
+
 func print(data <- readonly byte array) {
     var print_amount <- size = data.len
-    if print_amount == array_size_unset {
-        print_amount = c_str_nulpos(data.data)
+    if print_amount == mem.array_size_unset {
+        print_amount = mem.c_str_nulpos(data.data)
     }
     print_c_array(data.data, print_amount)
 }
@@ -48,7 +55,7 @@ func print_c_array(data <- readonly byte c_array,
     c_stdlib.printf("%s", "\n")
 }
 
-func print_str(my_str <- readonly str implicit ref) override {
+func print_str(my_str <- readonly str.str implicit ref) override {
     if my_str._on_heap {
         if my_str._heap_buf.len > 1 {
             print_c_array(
