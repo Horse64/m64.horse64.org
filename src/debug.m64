@@ -77,8 +77,10 @@ func assert_with_str_msg(condition <- bool,
 func assert_ex(condition <- bool,
         call_line <- size,
         call_col <- size,
-        call_file_uri <- readonly byte c_array,
-        call_file_uri_len <- size,
+        call_uri_bytes <- readonly byte c_array,
+        call_uri_bytes_len <- size,
+        expr_str_bytes <- readonly byte c_array,
+        expr_str_bytes_len <- size,
         ) {
     if not condition {
         io.print_stderr(
@@ -91,8 +93,10 @@ func assert_ex(condition <- bool,
 func assert_ex_with_cstr_msg(condition <- bool,
         call_line <- size,
         call_col <- size,
-        call_file_uri <- readonly byte c_array,
-        call_file_uri_len <- size,
+        call_uri_bytes <- readonly byte c_array,
+        call_uri_bytes_len <- size,
+        expr_str_bytes <- readonly byte c_array,
+        expr_str_bytes_len <- size,
         msg <- readonly byte c_array) override {
     var msg_data <- readonly byte c_array = msg
     var msg_len <- size = memory.c_str_nulpos(msg)
@@ -107,8 +111,10 @@ func assert_ex_with_cstr_msg(condition <- bool,
 func assert_ex_with_str_msg(condition <- bool,
         call_line <- size,
         call_col <- size,
-        call_file_uri <- readonly byte c_array,
-        call_file_uri_len <- size,
+        call_uri_bytes <- readonly byte c_array,
+        call_uri_bytes_len <- size,
+        expr_str_bytes <- readonly byte c_array,
+        expr_str_bytes_len <- size,
         msg <- readonly str.str implicit ref) override {
     var msg_data <- readonly byte c_array
     var msg_len <- size
