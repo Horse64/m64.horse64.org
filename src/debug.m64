@@ -74,3 +74,60 @@ func assert_with_str_msg(condition <- bool,
     }
 }
 
+func assert_ex(condition <- bool,
+        call_line <- size,
+        call_col <- size,
+        call_file_uri <- readonly byte c_array,
+        call_file_uri_len <- size,
+        ) {
+    if not condition {
+        io.print_stderr(
+            "ASSERTION FAILED, exiting program..."
+        )
+        system.exit(1)
+    }
+}
+
+func assert_ex_with_cstr_msg(condition <- bool,
+        call_line <- size,
+        call_col <- size,
+        call_file_uri <- readonly byte c_array,
+        call_file_uri_len <- size,
+        msg <- readonly byte c_array) override {
+    var msg_data <- readonly byte c_array = msg
+    var msg_len <- size = memory.c_str_nulpos(msg)
+    if not condition {
+        io.print_stderr(
+            "ASSERTION FAILED, exiting program..."
+        )
+        system.exit(1)
+    }
+}
+
+func assert_ex_with_str_msg(condition <- bool,
+        call_line <- size,
+        call_col <- size,
+        call_file_uri <- readonly byte c_array,
+        call_file_uri_len <- size,
+        msg <- readonly str.str implicit ref) override {
+    var msg_data <- readonly byte c_array
+    var msg_len <- size
+    if msg._on_heap {
+        if msg._heap_buf.len > 1 {
+            msg_data = msg._heap_buf.data
+            msg_len = msg._heap_buf.len - 1
+        }
+    } else {
+        if msg._stack_buf_len > 1 {
+            msg_data = msg._stack_buf
+            msg_len = msg._stack_buf_len - 1
+        }
+    }
+    if not condition {
+        io.print_stderr(
+            "ASSERTION FAILED, exiting program..."
+        )
+        system.exit(1)
+    }
+}
+
