@@ -1,4 +1,4 @@
-## @module std
+## @module str
 # Copyright (c) 2024, ellie/@ell1e & m64 stdlib authors (see AUTHORS.md).
 #
 # Redistribution and use in source and binary forms, with or without
@@ -29,8 +29,9 @@ c_import "stdlib.h" as c_stdlib
 c_import "stdio.h" as c_stdlib
 c_import "string.h" as c_stdlib
 
+import debug from m64.horse64.org
 import limit from m64.horse64.org
-import mem from m64.horse64.org
+import memory from m64.horse64.org
 
 const str_stack_bytes <- size = 32
 
@@ -59,33 +60,34 @@ func str.init_as_copy(
 func str.init_from_inline_c_str(
         c_str <- readonly byte c_array
         ) failable override {
-    var c_array_var <- readonly byte array = mem.alloc_array(
-        1, 0
-    )
-    if failed(mem.alloc_array) {
+    var c_array_var <- readonly byte array =
+        memory.alloc_array(
+            1, 0
+        )
+    if failed(memory.alloc_array) {
         return failed
     }
     c_array_var.data = c_str
-    c_array_var.len = mem.c_str_nulpos(c_str)
+    c_array_var.len = memory.c_str_nulpos(c_str)
     self.init_from_bytebuf(c_array_var)
     if failed(self.init_from_bytebuf) {
         return failed
     }
     c_array_var.data = none
-    mem.unalloc_array(c_array_var)
+    memory.unalloc_array(c_array_var)
 }
 
 func str.init_from_bytebuf(
         c_str <- readonly byte array
         ) failable override {
     var str_len <- size
-    if c_str.len == mem.array_size_unset {
-        str_len = mem.c_str_nulpos(c_str.data)
+    if c_str.len == memory.array_size_unset {
+        str_len = memory.c_str_nulpos(c_str.data)
     } else {
         str_len = c_str.len
     }
     if str_len < str_stack_bytes {
-        mem.memcpy(
+        memory.memcpy(
             c_str.data, self._stack_buf, str_len
         )
         self._stack_buf[str_len + 1] = 0
@@ -94,16 +96,16 @@ func str.init_from_bytebuf(
     }
     self._on_heap = yes
     if self._heap_buf != none {
-        mem.unalloc_array(self._heap_buf)
+        memory.unalloc_array(self._heap_buf)
     }
-    self._heap_buf = mem.alloc_array(
-        mem.size_of(self._heap_buf.data),
+    self._heap_buf = memory.alloc_array(
+        memory.size_of(self._heap_buf.data),
         str_len + 1
     )
-    if failed(mem.alloc_array) {
+    if failed(memory.alloc_array) {
         return failed
     }
-    mem.memcpy(
+    memory.memcpy(
         c_str.data, self._heap_buf.data, str_len
     )
     self._heap_buf[str_len + 1] = 0
@@ -136,8 +138,8 @@ func str.add_bytebuf(
         c_str <- readonly byte array
         ) failable override {
     var c_str_len <- size = c_str.len
-    if c_str_len == mem.array_size_unset {
-        c_str_len = mem.c_str_nulpos(c_str.data)
+    if c_str_len == memory.array_size_unset {
+        c_str_len = memory.c_str_nulpos(c_str.data)
     }
     var own_len <- size = self.len
     var needed_len <- size = c_str_len + own_len + 1
@@ -148,21 +150,21 @@ func str.add_bytebuf(
             self_data = self._heap_buf.data
             clear_data = self._heap_buf.data
         }
-        self._heap_buf.data = mem.alloc(needed_len)
-        if failed(mem.alloc) {
+        self._heap_buf.data = memory.alloc(needed_len)
+        if failed(memory.alloc) {
             self._heap_buf.data = clear_data
             return failed
         }
-        mem.memcpy(self_data, self._heap_buf.data, own_len)
-        mem.memcpy(
+        memory.memcpy(self_data, self._heap_buf.data, own_len)
+        memory.memcpy(
             c_str.data, self._heap_buf.data + own_len, c_str_len
         )
         self._heap_buf[own_len + c_str_len + 1] = 0
-        mem.unalloc(clear_data)
+        memory.unalloc(clear_data)
         self._heap_buf.len = needed_len
         return
     }
-    mem.memcpy(
+    memory.memcpy(
         c_str.data, self._stack_buf + own_len, c_str_len
     )
     self._stack_buf[own_len + c_str_len + 1] = 0
@@ -178,32 +180,32 @@ func str.len readonly -> size {
 
 func str.destroy {
     if self._on_heap {
-        mem.unalloc_array(self._heap_buf)
+        memory.unalloc_array(self._heap_buf)
     }
 }
 
 func str.copy_from(other_str <- readonly str implicit ref) failable {
     if not other_str._on_heap {
         if self._on_heap {
-            mem.unalloc_array(self._heap_buf)
+            memory.unalloc_array(self._heap_buf)
         }
-        mem.memcpy(
+        memory.memcpy(
             as_ref(other_str), as_ref(self),
-            mem.size_of(self)
+            memory.size_of(self)
         )
-        assert(not self._on_heap)
+        debug.assert(not self._on_heap)
     } else {
         if self._on_heap {
-            mem.unalloc_array(self._heap_buf)
+            memory.unalloc_array(self._heap_buf)
         }
         self._on_heap = yes
-        self._heap_buf = mem.alloc_array(
+        self._heap_buf = memory.alloc_array(
             1, other_str._heap_buf.len
         )
-        if failed(mem.alloc_array) {
+        if failed(memory.alloc_array) {
             return failed
         }
-        mem.memcpy(
+        memory.memcpy(
             other_str._heap_buf.data,
             self._heap_buf.data,
             other_str._heap_buf.len

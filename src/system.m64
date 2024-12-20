@@ -1,4 +1,4 @@
-## @module main
+## @module system
 # Copyright (c) 2024, ellie/@ell1e & m64 stdlib authors (see AUTHORS.md).
 #
 # Redistribution and use in source and binary forms, with or without
@@ -25,17 +25,11 @@
 # Alternatively, at your option, this file is offered under the Apache 2
 # license, see accompanied LICENSE.md.
 
-import debug from m64.horse64.org
-import io from m64.horse64.org
-import str from m64.horse64.org
+c_import "stdlib.h" as c_stdlib
+c_import "stdio.h" as c_stdlib
+c_import "string.h" as c_stdlib
 
-func main -> i32 {
-    var s <- str.str("Hello World!")
-    if failed(str.str) {
-        return -1
-    }
-    defer s.destroy()
-    io.print(s)
-    return 0
+func exit(result_code <- i32) {
+    c_stdlib.exit(result_code)
 }
 

@@ -1,4 +1,4 @@
-## @module main
+## @module debug
 # Copyright (c) 2024, ellie/@ell1e & m64 stdlib authors (see AUTHORS.md).
 #
 # Redistribution and use in source and binary forms, with or without
@@ -25,17 +25,52 @@
 # Alternatively, at your option, this file is offered under the Apache 2
 # license, see accompanied LICENSE.md.
 
-import debug from m64.horse64.org
 import io from m64.horse64.org
+import memory from m64.horse64.org
 import str from m64.horse64.org
+import system from m64.horse64.org
 
-func main -> i32 {
-    var s <- str.str("Hello World!")
-    if failed(str.str) {
-        return -1
+func assert(condition <- bool) {
+    if not condition {
+        io.print_stderr(
+            "ASSERTION FAILED, exiting program..."
+        )
+        system.exit(1)
     }
-    defer s.destroy()
-    io.print(s)
-    return 0
+}
+
+func assert_with_cstr_msg(condition <- bool,
+        msg <- readonly byte c_array) override {
+    var msg_data <- readonly byte c_array = msg
+    var msg_len <- size = memory.c_str_nulpos(msg)
+    if not condition {
+        io.print_stderr(
+            "ASSERTION FAILED, exiting program..."
+        )
+        system.exit(1)
+    }
+}
+
+func assert_with_str_msg(condition <- bool,
+        msg <- readonly str.str implicit ref) override {
+    var msg_data <- readonly byte c_array
+    var msg_len <- size
+    if msg._on_heap {
+        if msg._heap_buf.len > 1 {
+            msg_data = msg._heap_buf.data
+            msg_len = msg._heap_buf.len - 1
+        }
+    } else {
+        if msg._stack_buf_len > 1 {
+            msg_data = msg._stack_buf
+            msg_len = msg._stack_buf_len - 1
+        }
+    }
+    if not condition {
+        io.print_stderr(
+            "ASSERTION FAILED, exiting program..."
+        )
+        system.exit(1)
+    }
 }
 
