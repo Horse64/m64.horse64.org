@@ -87,7 +87,7 @@ func str.init_from_bytebuf(
         str_len = c_str.len
     }
     if str_len < str_stack_bytes {
-        memory.memcpy(
+        memory.copy(
             c_str.data, self._stack_buf, str_len
         )
         self._stack_buf[str_len + 1] = 0
@@ -105,7 +105,7 @@ func str.init_from_bytebuf(
     if failed(memory.alloc_array) {
         return failed
     }
-    memory.memcpy(
+    memory.copy(
         c_str.data, self._heap_buf.data, str_len
     )
     self._heap_buf[str_len + 1] = 0
@@ -155,8 +155,8 @@ func str.add_bytebuf(
             self._heap_buf.data = clear_data
             return failed
         }
-        memory.memcpy(self_data, self._heap_buf.data, own_len)
-        memory.memcpy(
+        memory.copy(self_data, self._heap_buf.data, own_len)
+        memory.copy(
             c_str.data, self._heap_buf.data + own_len, c_str_len
         )
         self._heap_buf[own_len + c_str_len + 1] = 0
@@ -164,7 +164,7 @@ func str.add_bytebuf(
         self._heap_buf.len = needed_len
         return
     }
-    memory.memcpy(
+    memory.copy(
         c_str.data, self._stack_buf + own_len, c_str_len
     )
     self._stack_buf[own_len + c_str_len + 1] = 0
@@ -189,7 +189,7 @@ func str.copy_from(other_str <- readonly str implicit ref) failable {
         if self._on_heap {
             memory.unalloc_array(self._heap_buf)
         }
-        memory.memcpy(
+        memory.copy(
             as_ref(other_str), as_ref(self),
             memory.size_of(self)
         )
@@ -205,7 +205,7 @@ func str.copy_from(other_str <- readonly str implicit ref) failable {
         if failed(memory.alloc_array) {
             return failed
         }
-        memory.memcpy(
+        memory.copy(
             other_str._heap_buf.data,
             self._heap_buf.data,
             other_str._heap_buf.len
@@ -222,5 +222,35 @@ func str.get_c_str readonly -> readonly byte c_array {
     }
     result = as(readonly byte c_array, self._stack_buf)
     return result
+}
+
+func num_to_str_buf(
+        value <- u64,
+        write_to <- byte c_array,
+        write_to_len <- size) -> size {
+    if write_to_len <= 0 {
+        return 0
+    }
+    var numsbuf <- byte c_array = "0123456789"
+    var buf <- byte c_array[64]
+    var writep <- byte c_array
+    writep = buf
+    while value >= 10 {
+        debug.assert(writep < buf + 63)
+        var subvalue <- u64 = value - (value % 10)
+        deref(writep) = numsbuf[subvalue]
+        writep += 1
+    }
+    debug.assert(writep < buf + 63)
+    var subvalue <- u64 = value - (value % 10)
+    deref(writep) = numsbuf[subvalue]
+    writep += 1
+    var numlen <- size = (writep - buf)
+    if numlen > write_to_len {
+        return 0
+    }
+    debug.assert(numlen > 0)
+    memory.copy(buf, write_to, numlen)
+    return numlen
 }
 

@@ -42,7 +42,7 @@ func c_str_nulpos(str_ref <- readonly byte c_array) -> size {
     return amount
 }
 
-func memcpy(origin <- readonly any ref, dest <- any ref,
+func copy(origin <- readonly any ref, dest <- any ref,
             amount <- size) {
     c_stdlib.memmove(dest, origin, amount)
 }
