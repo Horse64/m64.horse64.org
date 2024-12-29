@@ -231,7 +231,7 @@ func num_to_str_buf(
     if write_to_len <= 0 {
         return 0
     }
-    var numsbuf <- byte c_array = "0123456789"
+    var numsbuf <- readonly byte c_array = "0123456789"
     var buf <- byte c_array[64]
     var writep <- byte c_array
     writep = buf
