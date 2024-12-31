@@ -118,6 +118,17 @@ func str.init failable {
     self._stack_buf_len = 1
 }
 
+func str.get_byte(idx <- size) -> u8 {
+    var len = self.len
+    if idx < 1 or idx > len {
+        return 0
+    }
+    if not self._on_heap {
+        return self._stack_buf[idx]
+    }
+    return self._heap_buf.data[idx]
+}
+
 func str.add(other_str <- readonly str implicit ref) failable {
     var other_len <- size = other_str.len
     var other_data <- readonly byte c_array =
@@ -132,6 +143,39 @@ func str.add(other_str <- readonly str implicit ref) failable {
     if failed(self.add) {
         return failed
     }
+}
+
+func str.add_byte(
+        value <- byte
+        ) failable override {
+    var own_len = self.len
+    var needed_len <- size = own_len + 1 + 1
+    if self._on_heap or needed_len > str_stack_bytes {
+        var self_data <- byte c_array = self._stack_buf
+        var clear_data <- byte c_array = none
+        if self._on_heap {
+            self_data = self._heap_buf.data
+            clear_data = self._heap_buf.data
+        }
+        var new_data <- readonly byte c_array =
+            memory.alloc(needed_len)
+        if failed(memory.alloc) {
+            if clear_data != none {
+                self._heap_buf.data = clear_data
+            }
+            return failed
+        }
+        memory.copy(self_data, new_data, own_len)
+        new_data[own_len + 1] = value
+        new_data[own_len + 2] = 0
+        self._heap_buf.data = new_data
+        memory.unalloc(clear_data)
+        self._heap_buf.len = needed_len
+        return
+    }
+    self._stack_buf[own_len + 1] = value
+    self._stack_buf[own_len + 2] = 0
+    self._stack_buf_len = needed_len
 }
 
 func str.add_bytebuf(
@@ -150,16 +194,20 @@ func str.add_bytebuf(
             self_data = self._heap_buf.data
             clear_data = self._heap_buf.data
         }
-        self._heap_buf.data = memory.alloc(needed_len)
+        var new_data <- readonly byte c_array =
+            memory.alloc(needed_len)
         if failed(memory.alloc) {
-            self._heap_buf.data = clear_data
+            if clear_data != none {
+                self._heap_buf.data = clear_data
+            }
             return failed
         }
-        memory.copy(self_data, self._heap_buf.data, own_len)
+        memory.copy(self_data, new_data, own_len)
         memory.copy(
-            c_str.data, self._heap_buf.data + own_len, c_str_len
+            c_str.data, new_data + own_len, c_str_len
         )
-        self._heap_buf[own_len + c_str_len + 1] = 0
+        new_data[own_len + c_str_len + 1] = 0
+        self._heap_buf = new_data
         memory.unalloc(clear_data)
         self._heap_buf.len = needed_len
         return
@@ -221,6 +269,77 @@ func str.get_c_str readonly -> readonly byte c_array {
         return result
     }
     result = as(readonly byte c_array, self._stack_buf)
+    return result
+}
+
+func format(format_mask -> readonly str,
+        ... -> multi(i8, i16, i32, i64,
+            u8, u16, u32, u64,
+            str implicit ref,
+            any ref
+            )) failable -> str {
+    var format_args_count = varargs.count
+    var result <- str.str("")
+    if failed(str.str) {
+        return failed
+    }
+    defer failed result.destroy()
+
+    var i <- size = 1
+    const len <- size = str.len
+    while i <= len {
+        var c <- byte = str.get_byte(i)
+        if c == c"{" {
+            if i + 1 <= len and
+                    str.get_byte(i + 1) == c"{" {
+                result.add(c)
+                if failed(result.add) {
+                    return failed
+                }
+                i += 2
+                continue
+            } elseif i + 1 <= len and
+                    str.get_buf(i + 1) == c"}" {
+                result.add("<unprintable value>")
+                if failed(result.add) {
+                    return failed
+                }
+                i += 2
+                continue
+            }
+        } elseif c == c"}" {
+            if i + 1 <= len and
+                    str.get_byte(i + 1) == "}" {
+                result.add(c)
+                if failed(result.add) {
+                    return failed
+                }
+                i += 2
+                continue
+            }
+        }
+        i += 1
+    }
+    return result
+}
+
+func format_c_string(format_mask -> readonly byte c_array,
+        ... -> multi(i8, i16, i32, i64,
+            u8, u16, u32, u64,
+            str implicit ref,
+            any ref
+            )) failable -> str override {
+    var format_mask_str <- str(format_mask)
+    if failed(str) {
+        return failed
+    }
+    defer format_mask_str.destroy()
+
+    var result <- str =
+        format(format_mask_str, varargs.forward())
+    if failed(format) {
+        return failed
+    }
     return result
 }
 
