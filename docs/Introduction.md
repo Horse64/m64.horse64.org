@@ -25,10 +25,15 @@ expects you to know how Horse64 works. Based on its sibling,
 Moose64 was constructed with the following changes:
 
 
-### Static types and type annotations
+### Syntax, static types, and type annotations
+
+The basic syntax of Moose64 is based on the
+[Horse64 syntax](
+https://codeberg.org/Horse64/core.horse64.org/src/branch/main/docs/Tutorials/Syntax.md), but altered for Moose64 `.m64` files.
+Continue reading to learn the main changes.
 
 Unlike Horse64 which is dynamically typed, Moose64 is
-**statically typed** with required type annotations:
+**statically typed** with mandatory type annotations:
 
 ```Moose64
 import std from m64.horse64.org
@@ -46,9 +51,19 @@ func main -> bool {
 ```
 
 For variables and function parameters, `<- ...type desc...` after
-the declaration will annotate the type. For function return values,
-`-> ...type desc...` right before the code block will annotate
-the type.
+the declaration will annotate the parameter or variable type:
+
+```Moose64
+var my_var <- i32 = 5
+```
+For function return values, `-> ...type desc...` right before the
+code block will annotate the return type:
+
+```
+func my_func -> i32 {
+    return 5
+}
+```
 
 Function pointers work by inlining the function header inside `(...)`
 parenthesis:
